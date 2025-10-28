@@ -2,8 +2,15 @@ import express from "express";
 import usersRoutes from "./routes/users";
 import authRoutes from "./routes/auth";
 import { setupSwagger } from "../swagger";
+import cors from "cors";
 
 const app = express();
+
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+}));
+
 app.use(express.json());
 
 setupSwagger(app);

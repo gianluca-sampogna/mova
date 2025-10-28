@@ -21,6 +21,7 @@ export const initDatabase = () => {
       CREATE TABLE IF NOT EXISTS Motorista (
         id_motorista INTEGER PRIMARY KEY,
         saldo REAL DEFAULT 0,
+        cnh TEXT NOT NULL,
         FOREIGN KEY (id_motorista) REFERENCES Pessoa(id_usuario)
       );
 
@@ -87,4 +88,17 @@ export const initDatabase = () => {
 
     console.log("📦 Todas as tabelas foram criadas ou já existiam.");
   });
+
+  try {
+    db.exec(`ALTER TABLE motorista ADD COLUMN nova_coluna TEXT;`);
+    console.log("✅ Coluna 'nova_coluna' adicionada com sucesso!");
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      if (!err.message.includes("duplicate column name")) {
+        console.error("❌ Erro ao adicionar coluna:", err.message);
+      }
+    } else {
+      console.error("❌ Erro desconhecido ao adicionar coluna:", err);
+    }
+  }
 };
