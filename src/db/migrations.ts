@@ -21,6 +21,7 @@ export const initDatabase = () => {
       CREATE TABLE IF NOT EXISTS Motorista (
         id_motorista INTEGER PRIMARY KEY,
         saldo REAL DEFAULT 0,
+        cnh TEXT NOT NULL,
         FOREIGN KEY (id_motorista) REFERENCES Pessoa(id_usuario)
       );
 
@@ -87,4 +88,5 @@ export const initDatabase = () => {
 
     console.log("📦 Todas as tabelas foram criadas ou já existiam.");
   });
+
 };

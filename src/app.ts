@@ -3,12 +3,12 @@ import cors from "cors";
 import usersRoutes from "./routes/users";
 import authRoutes from "./routes/auth";
 import { setupSwagger } from "../swagger";
+import cors from "cors";
 
 const app = express();
 
-// Habilita CORS (resolve erro do navegador)
 app.use(cors({
-  origin: "*", // ou troca por 'http://localhost:8081' se quiser limitar
+  origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE"],
 }));
 

@@ -22,9 +22,9 @@ router.post("/login", (req, res) => {
   db.get(sql, [email], (err, user: Pessoa) => {
     if (err)
       return res.status(500).json({ message: "Erro no banco de dados", err });
-    if (!user)
-      return res.status(401).json({ message: "Email ou senha inválidos" });
-
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado." });
+    }
     // Verifica senha (como no seed você colocou todas como '123', só pra exemplo simples)
     // Se estivesse usando hash, usaríamos bcrypt.compare(senha, user.senha)
     if (senha !== user.senha) {
@@ -38,7 +38,7 @@ router.post("/login", (req, res) => {
       // { expiresIn: "1h" }
     );
 
-    res.json({ token });
+     res.status(200).json({ message: "Login realizado com sucesso!", token });
   });
 });
 

@@ -12,6 +12,7 @@ export interface Pessoa {
 export interface Motorista extends Pessoa {
   id_motorista?: number;
   saldo: number;
+  cnh: string;
 }
 
 // Subclasse Passageiro
