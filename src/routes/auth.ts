@@ -25,11 +25,14 @@ router.post("/login", (req, res) => {
   WHERE p.email = ?
 `;
 
-  db.get(sql, [email], (err, user: any) => {
+  db.get(sql, [email], async (err, user: any) => {
     if (err) return res.status(500).json({ message: "Erro no banco de dados", err });
     if (!user) return res.status(404).json({ message: "Usuário não encontrado." });
 
-    if (senha !== user.senha) return res.status(401).json({ message: "Email ou senha inválidos" });
+    const senhaCorreta = await bcrypt.compare(senha, user.senha);
+    if (!senhaCorreta) {
+      return res.status(401).json({ message: "Email ou senha inválidos" });
+    }
 
     const tipo = user.id_motorista ? "motorista" : "passageiro";
 

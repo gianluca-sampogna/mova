@@ -2,8 +2,10 @@ import { Router } from "express";
 import { db } from "../db/database";
 import { authenticate } from "@src/middlewares/auth";
 import { Request, Response } from "express";
+import bcrypt from 'bcryptjs';
 
 const router = Router();
+const saltRounds = 10;
 
 /**
  * @swagger
@@ -167,50 +169,58 @@ router.get("/", authenticate, (_, res) => {
  */
 
 const cadastrarUsuario =
-  (tipo: "passageiro" | "motorista") => (req: Request, res: Response) => {
-    const { nome, endereco, email, num_telefone, senha, cnh } = req.body;
+  (tipo: "passageiro" | "motorista") => async (req: Request, res: Response) => {
+    try {
+      const { nome, endereco, email, num_telefone, senha, cnh } = req.body;
 
-    if (!nome || !email || !senha || !num_telefone || !endereco || (tipo === "motorista" && !cnh)) {
-      return res
-        .status(400)
-        .json({ message: "Todos os campos são obrigatórios." });
-    }
-
-    db.run(
-      `INSERT INTO Pessoa (nome, endereco, email, num_telefone, senha) VALUES (?, ?, ?, ?, ?)`,
-      [nome, endereco, email, num_telefone, senha],
-      function (err) {
-        if (err) {
-          if ((err as any).code === "SQLITE_CONSTRAINT") {
-            return res.status(409).json({ message: "Usuário já existe" });
-          }
-          return res.status(500).json({ error: err.message });
-        }
-        const id_usuario = this.lastID;
-
-        const subclasseQuery =
-          tipo === "motorista"
-            ? `INSERT INTO Motorista (id_motorista, saldo, cnh) VALUES (?, 0, ?)`
-            : `INSERT INTO Passageiro (id_passageiro) VALUES (?)`;
-        const params = tipo === "motorista" ? [id_usuario, req.body.cnh] : [id_usuario];
-
-        db.run(subclasseQuery, params, (err2) => {
-          if (err2) {
-            if ((err2 as any).code === "SQLITE_CONSTRAINT") {
-              return res.status(409).json({ message: "Subclasse já existe" });
-            }
-            return res.status(500).json({ error: err2.message });
-          }
-
-          res.status(201).json({
-            id_usuario,
-            nome,
-            email,
-            tipo,
-          });
-        });
+      if (!nome || !email || !senha || !num_telefone || !endereco || (tipo === "motorista" && !cnh)) {
+        return res.status(400).json({ message: "Todos os campos são obrigatórios." });
       }
-    );
+
+      // 🔐 Gera o hash ANTES do insert
+      const senhaHash = await bcrypt.hash(senha, saltRounds);
+
+      db.run(
+        `INSERT INTO Pessoa (nome, endereco, email, num_telefone, senha) VALUES (?, ?, ?, ?, ?)`,
+        [nome, endereco, email, num_telefone, senhaHash],
+        function (err) {
+          if (err) {
+            if ((err as any).code === "SQLITE_CONSTRAINT") {
+              return res.status(409).json({ message: "Usuário já existe" });
+            }
+            return res.status(500).json({ error: err.message });
+          }
+
+          const id_usuario = this.lastID;
+
+          const subclasseQuery =
+            tipo === "motorista"
+              ? `INSERT INTO Motorista (id_motorista, saldo, cnh) VALUES (?, 0, ?)`
+              : `INSERT INTO Passageiro (id_passageiro) VALUES (?)`;
+
+          const params = tipo === "motorista" ? [id_usuario, cnh] : [id_usuario];
+
+          db.run(subclasseQuery, params, (err2) => {
+            if (err2) {
+              if ((err2 as any).code === "SQLITE_CONSTRAINT") {
+                return res.status(409).json({ message: "Subclasse já existe" });
+              }
+              return res.status(500).json({ error: err2.message });
+            }
+
+            res.status(201).json({
+              id_usuario,
+              nome,
+              email,
+              tipo,
+            });
+          });
+        }
+      );
+    } catch (error) {
+      console.error("Erro no cadastro:", error);
+      res.status(500).json({ message: "Erro ao cadastrar usuário." });
+    }
   };
 
 router.post("/passageiro", cadastrarUsuario("passageiro"));
