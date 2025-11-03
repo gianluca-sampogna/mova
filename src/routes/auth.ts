@@ -17,28 +17,28 @@ router.post("/login", (req, res) => {
     return res.status(400).json({ message: "Email e senha são obrigatórios." });
   }
 
-  const sql = `SELECT * FROM Pessoa WHERE email = ?`;
+  const sql = `
+  SELECT p.*, m.id_motorista, pa.id_passageiro
+  FROM Pessoa p
+  LEFT JOIN Motorista m ON p.id_usuario = m.id_motorista
+  LEFT JOIN Passageiro pa ON p.id_usuario = pa.id_passageiro
+  WHERE p.email = ?
+`;
 
-  db.get(sql, [email], (err, user: Pessoa) => {
-    if (err)
-      return res.status(500).json({ message: "Erro no banco de dados", err });
-    if (!user) {
-      return res.status(404).json({ message: "Usuário não encontrado." });
-    }
-    // Verifica senha (como no seed você colocou todas como '123', só pra exemplo simples)
-    // Se estivesse usando hash, usaríamos bcrypt.compare(senha, user.senha)
-    if (senha !== user.senha) {
-      return res.status(401).json({ message: "Email ou senha inválidos" });
-    }
+  db.get(sql, [email], (err, user: any) => {
+    if (err) return res.status(500).json({ message: "Erro no banco de dados", err });
+    if (!user) return res.status(404).json({ message: "Usuário não encontrado." });
 
-    // Gera JWT
+    if (senha !== user.senha) return res.status(401).json({ message: "Email ou senha inválidos" });
+
+    const tipo = user.id_motorista ? "motorista" : "passageiro";
+
     const token = jwt.sign(
-      { id_usuario: user.id_usuario, email: user.email },
+      { id_usuario: user.id_usuario, email: user.email, tipo },
       JWT_SECRET
-      // { expiresIn: "1h" }
     );
 
-     res.status(200).json({ message: "Login realizado com sucesso!", token });
+    res.status(200).json({ message: "Login realizado com sucesso!", token, tipo });
   });
 });
 

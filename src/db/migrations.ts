@@ -89,4 +89,32 @@ export const initDatabase = () => {
     console.log("📦 Todas as tabelas foram criadas ou já existiam.");
   });
 
+  db.run(`
+    ALTER TABLE Motorista ADD COLUMN cnh TEXT;
+  `, (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.error('Erro ao adicionar colunas:', err.message);
+    }
+  });
+  db.run(`
+    ALTER TABLE Veiculo ADD COLUMN tipo TEXT;
+  `, (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.error('Erro ao adicionar colunas:', err.message);
+    }
+  });
+  db.run(`
+    ALTER TABLE Veiculo ADD COLUMN capacidade TEXT;
+  `, (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.error('Erro ao adicionar colunas:', err.message);
+    }
+  });
+  db.run(`
+    ALTER TABLE Veiculo ADD COLUMN chassi TEXT;
+  `, (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.error('Erro ao adicionar colunas:', err.message);
+    }
+  });
 };
