@@ -1,5 +1,4 @@
 import express from "express";
-import cors from "cors";
 import usersRoutes from "./routes/users";
 import authRoutes from "./routes/auth";
 import { setupSwagger } from "../swagger";
