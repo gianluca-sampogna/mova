@@ -4,7 +4,6 @@ import { seedDatabase } from "./db/seed";
 
 const PORT = process.env.PORT || 3000;
 
-// Inicializa o banco antes de rodar o servidor
 initDatabase();
 seedDatabase();
 

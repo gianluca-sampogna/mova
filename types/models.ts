@@ -22,10 +22,12 @@ export interface Passageiro extends Pessoa {
 
 // Veículo
 export interface Veiculo {
+  tipo: string;                
   placa: string;
   modelo: string;
   cor: string;
-  passageiros_maximos: number;
+  passageiros_maximos: number; 
+  chassi: string;
   id_motorista: number;
 }
 

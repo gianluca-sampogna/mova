@@ -104,13 +104,6 @@ export const initDatabase = () => {
     }
   });
   db.run(`
-    ALTER TABLE Veiculo ADD COLUMN capacidade TEXT;
-  `, (err) => {
-    if (err && !err.message.includes('duplicate column name')) {
-      console.error('Erro ao adicionar colunas:', err.message);
-    }
-  });
-  db.run(`
     ALTER TABLE Veiculo ADD COLUMN chassi TEXT;
   `, (err) => {
     if (err && !err.message.includes('duplicate column name')) {
