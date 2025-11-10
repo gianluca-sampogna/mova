@@ -2,6 +2,7 @@ import express from "express";
 import usersRoutes from "./routes/users";
 import authRoutes from "./routes/auth";
 import veiculoRoutes from "./routes/veiculo";
+import viagensRoutes from "./routes/viagens";
 import { setupSwagger } from "../swagger";
 import cors from "cors";
 
@@ -19,6 +20,8 @@ setupSwagger(app);
 app.use("/users", usersRoutes);
 app.use("/auth", authRoutes);
 app.use("/veiculo", veiculoRoutes);
+app.use("/veiculo", veiculoRoutes);
+app.use("/viagens", viagensRoutes);
 
 app.get("/", (_, res) => res.send("🚀 API está rodando!"));
 
