@@ -8,8 +8,8 @@ export const initDatabase = () => {
       -- =======================================
       CREATE TABLE IF NOT EXISTS Pessoa (
         id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome TEXT NOT NULL,   
-        senha TEXT NOT NULL,   
+        nome TEXT NOT NULL,  
+        senha TEXT NOT NULL,  
         email TEXT UNIQUE NOT NULL,
         num_telefone TEXT NOT NULL,
         endereco TEXT NOT NULL
@@ -21,7 +21,7 @@ export const initDatabase = () => {
       CREATE TABLE IF NOT EXISTS Motorista (
         id_motorista INTEGER PRIMARY KEY,
         saldo REAL DEFAULT 0,
-        cnh TEXT NOT NULL,
+        cnh TEXT NOT NULL, -- << JÁ ESTAVA AQUI, CORRETO.
         FOREIGN KEY (id_motorista) REFERENCES Pessoa(id_usuario)
       );
 
@@ -42,11 +42,13 @@ export const initDatabase = () => {
         cor TEXT NOT NULL,
         passageiros_maximos INTEGER NOT NULL,
         id_motorista INTEGER NOT NULL,
+        tipo TEXT, -- << ADICIONADO AQUI
+        chassi TEXT, -- << ADICIONADO AQUI
         FOREIGN KEY (id_motorista) REFERENCES Motorista(id_motorista)
       );
 
       -- =======================================
-      -- Viagem (1 motorista → n viagens, 1 veículo → 1 viagem)
+      -- Viagem (1 motorista → n viagens)
       -- =======================================
       CREATE TABLE IF NOT EXISTS Viagem (
         id_viagem INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,7 +58,9 @@ export const initDatabase = () => {
         local_chegada TEXT NOT NULL,
         vagas_maximas INTEGER NOT NULL,
         id_motorista INTEGER NOT NULL,
-        placa_veiculo TEXT UNIQUE NOT NULL,
+        placa_veiculo TEXT NOT NULL, -- << CORRIGIDO: REMOVIDO O 'UNIQUE'
+        km REAL, -- << ADICIONADO AQUI
+        valor_total REAL, -- << ADICIONADO AQUI
         FOREIGN KEY (id_motorista) REFERENCES Motorista(id_motorista),
         FOREIGN KEY (placa_veiculo) REFERENCES Veiculo(placa)
       );
@@ -89,39 +93,8 @@ export const initDatabase = () => {
     console.log("📦 Todas as tabelas foram criadas ou já existiam.");
   });
 
-  db.run(`
-    ALTER TABLE Motorista ADD COLUMN cnh TEXT;
-  `, (err) => {
-    if (err && !err.message.includes('duplicate column name')) {
-      console.error('Erro ao adicionar colunas:', err.message);
-    }
-  });
-  db.run(`
-    ALTER TABLE Veiculo ADD COLUMN tipo TEXT;
-  `, (err) => {
-    if (err && !err.message.includes('duplicate column name')) {
-      console.error('Erro ao adicionar colunas:', err.message);
-    }
-  });
-  db.run(`
-    ALTER TABLE Veiculo ADD COLUMN chassi TEXT;
-  `, (err) => {
-    if (err && !err.message.includes('duplicate column name')) {
-      console.error('Erro ao adicionar colunas:', err.message);
-    }
-  });
-  db.run(`
-    ALTER TABLE Viagem ADD COLUMN km REAL;
-  `, (err) => {
-    if (err && !err.message.includes('duplicate column name')) {
-      console.error('Erro ao adicionar colunas:', err.message);
-    }
-  });
-  db.run(`
-    ALTER TABLE Viagem ADD COLUMN valor_total REAL;
-  `, (err) => {
-    if (err && !err.message.includes('duplicate column name')) {
-      console.error('Erro ao adicionar colunas:', err.message);
-    }
-  });
+  // --- REMOVIDO ---
+  // Os comandos 'ALTER TABLE' abaixo foram removidos
+  // pois as colunas agora são criadas
+  // diretamente no 'CREATE TABLE' acima.
 };
