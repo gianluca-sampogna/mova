@@ -26,8 +26,10 @@ router.post("/login", (req, res) => {
 `;
 
   db.get(sql, [email], async (err, user: any) => {
-    if (err) return res.status(500).json({ message: "Erro no banco de dados", err });
-    if (!user) return res.status(404).json({ message: "Usuário não encontrado." });
+    if (err)
+      return res.status(500).json({ message: "Erro no banco de dados", err });
+    if (!user)
+      return res.status(404).json({ message: "Usuário não encontrado." });
 
     const senhaCorreta = await bcrypt.compare(senha, user.senha);
     if (!senhaCorreta) {
@@ -41,7 +43,16 @@ router.post("/login", (req, res) => {
       JWT_SECRET
     );
 
-    res.status(200).json({ message: "Login realizado com sucesso!", token, tipo });
+    // --- CORREÇÃO AQUI ---
+    // Adicione id_usuario: user.id_usuario ao JSON
+    res.status(200).json({
+      message: "Login realizado com sucesso!",
+      token,
+      tipo,
+      id_usuario: user.id_usuario, // Adicionado
+      user: user, // Adicionado
+    });
+    // -----------------------
   });
 });
 

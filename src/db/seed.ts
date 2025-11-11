@@ -1,4 +1,5 @@
 import { db } from "./database";
+import bcrypt from "bcryptjs"; // 1. Importe o bcrypt
 
 // Função utilitária para gerar um número de telefone simulado
 const generatePhone = (start: string) => {
@@ -28,6 +29,12 @@ for (let i = 0; i < 30; i++) {
 }
 
 export const seedDatabase = () => {
+  // 2. Gere o hash para a senha '123' ANTES de executar o SQL
+  // Usamos 'Sync' (síncrono) aqui pois é um script de seed,
+  // não há problema em bloquear a thread principal momentaneamente.
+  const salt = bcrypt.genSaltSync(10);
+  const hashedPassword = bcrypt.hashSync("123", salt);
+
   db.serialize(() => {
     console.log("🌱 Iniciando seed do banco de dados (COM NOME)...");
 
@@ -41,55 +48,59 @@ export const seedDatabase = () => {
       DELETE FROM Motorista;
       DELETE FROM Pessoa;
 
+      -- !!! CORREÇÃO ADICIONADA !!!
+      -- Reseta o contador de auto-incremento (id_usuario) da tabela Pessoa
+      DELETE FROM sqlite_sequence WHERE name = 'Pessoa';
+
       --------------------------------------------------
-      -- 1. PESSOAS (Motoristas: 1-10 | Passageiros: 11-40) COM SENHA '123'
+      -- 1. PESSOAS (Motoristas: 1-10 | Passageiros: 11-40) COM SENHA HASHED
       --------------------------------------------------
 
       -- 10 Motoristas
       INSERT INTO Pessoa (nome, endereco, email, num_telefone, senha) VALUES 
-        ('Carlos Silva', 'Rua das Palmeiras, 10', 'motorista1@email.com', '${motoristaPhones[0]}', '123'),
-        ('Maria Santos', 'Av. Paulista, 1500', 'motorista2@email.com', '${motoristaPhones[1]}', '123'),
-        ('João Oliveira', 'Rua 7 de Setembro, 50', 'motorista3@email.com', '${motoristaPhones[2]}', '123'),
-        ('Ana Costa', 'Rua do Sol, 300', 'motorista4@email.com', '${motoristaPhones[3]}', '123'),
-        ('Pedro Rocha', 'Av. Brasil, 222', 'motorista5@email.com', '${motoristaPhones[4]}', '123'),
-        ('Sofia Almeida', 'Estrada Velha, 99', 'motorista6@email.com', '${motoristaPhones[5]}', '123'),
-        ('Lucas Souza', 'Praça da Sé, 1', 'motorista7@email.com', '${motoristaPhones[6]}', '123'),
-        ('Isabela Lima', 'Alameda dos Anjos, 101', 'motorista8@email.com', '${motoristaPhones[7]}', '123'),
-        ('Guilherme Melo', 'Rua da Saudade, 45', 'motorista9@email.com', '${motoristaPhones[8]}', '123'),
-        ('Laura Fernandes', 'Av. Atlântica, 500', 'motorista10@email.com', '${motoristaPhones[9]}', '123');
+        ('Carlos Silva', 'Rua das Palmeiras, 10', 'motorista1@email.com', '${motoristaPhones[0]}', '${hashedPassword}'),
+        ('Maria Santos', 'Av. Paulista, 1500', 'motorista2@email.com', '${motoristaPhones[1]}', '${hashedPassword}'),
+        ('João Oliveira', 'Rua 7 de Setembro, 50', 'motorista3@email.com', '${motoristaPhones[2]}', '${hashedPassword}'),
+        ('Ana Costa', 'Rua do Sol, 300', 'motorista4@email.com', '${motoristaPhones[3]}', '${hashedPassword}'),
+        ('Pedro Rocha', 'Av. Brasil, 222', 'motorista5@email.com', '${motoristaPhones[4]}', '${hashedPassword}'),
+        ('Sofia Almeida', 'Estrada Velha, 99', 'motorista6@email.com', '${motoristaPhones[5]}', '${hashedPassword}'),
+        ('Lucas Souza', 'Praça da Sé, 1', 'motorista7@email.com', '${motoristaPhones[6]}', '${hashedPassword}'),
+        ('Isabela Lima', 'Alameda dos Anjos, 101', 'motorista8@email.com', '${motoristaPhones[7]}', '${hashedPassword}'),
+        ('Guilherme Melo', 'Rua da Saudade, 45', 'motorista9@email.com', '${motoristaPhones[8]}', '${hashedPassword}'),
+        ('Laura Fernandes', 'Av. Atlântica, 500', 'motorista10@email.com', '${motoristaPhones[9]}', '${hashedPassword}');
 
       -- 30 Passageiros
       INSERT INTO Pessoa (nome, endereco, email, num_telefone, senha) VALUES 
-        ('Ricardo Pires', 'Rua A, 1', 'passageiro1@email.com', '${passageiroPhones[0]}', '123'),
-        ('Camila Alves', 'Rua B, 2', 'passageiro2@email.com', '${passageiroPhones[1]}', '123'),
-        ('Felipe Gomes', 'Rua C, 3', 'passageiro3@email.com', '${passageiroPhones[2]}', '123'),
-        ('Gabriela Nogueira', 'Rua D, 4', 'passageiro4@email.com', '${passageiroPhones[3]}', '123'),
-        ('Rafael Barbosa', 'Rua E, 5', 'passageiro5@email.com', '${passageiroPhones[4]}', '123'),
-        ('Aline Dantas', 'Rua F, 6', 'passageiro6@email.com', '${passageiroPhones[5]}', '123'),
-        ('Bruno Queiroz', 'Rua G, 7', 'passageiro7@email.com', '${passageiroPhones[6]}', '123'),
-        ('Julia Martins', 'Rua H, 8', 'passageiro8@email.com', '${passageiroPhones[7]}', '123'),
-        ('Daniel Lins', 'Rua I, 9', 'passageiro9@email.com', '${passageiroPhones[8]}', '123'),
-        ('Vitória Rios', 'Rua J, 10', 'passageiro10@email.com', '${passageiroPhones[9]}', '123'),
-        ('Leonardo Vaz', 'Rua K, 11', 'passageiro11@email.com', '${passageiroPhones[10]}', '123'),
-        ('Patrícia Neves', 'Rua L, 12', 'passageiro12@email.com', '${passageiroPhones[11]}', '123'),
-        ('Thiago Fogaça', 'Rua M, 13', 'passageiro13@email.com', '${passageiroPhones[12]}', '123'),
-        ('Manuela Mendes', 'Rua N, 14', 'passageiro14@email.com', '${passageiroPhones[13]}', '123'),
-        ('Enzo Ferreira', 'Rua O, 15', 'passageiro15@email.com', '${passageiroPhones[14]}', '123'),
-        ('Helena Castro', 'Rua P, 16', 'passageiro16@email.com', '${passageiroPhones[15]}', '123'),
-        ('Caio Becker', 'Rua Q, 17', 'passageiro17@email.com', '${passageiroPhones[16]}', '123'),
-        ('Bianca Cruz', 'Rua R, 18', 'passageiro18@email.com', '${passageiroPhones[17]}', '123'),
-        ('André Rocha', 'Rua S, 19', 'passageiro19@email.com', '${passageiroPhones[18]}', '123'),
-        ('Clara Pinto', 'Rua T, 20', 'passageiro20@email.com', '${passageiroPhones[19]}', '123'),
-        ('Davi Guerra', 'Rua U, 21', 'passageiro21@email.com', '${passageiroPhones[20]}', '123'),
-        ('Eva Ribeiro', 'Rua V, 22', 'passageiro22@email.com', '${passageiroPhones[21]}', '123'),
-        ('Giovanni Telles', 'Rua W, 23', 'passageiro23@email.com', '${passageiroPhones[22]}', '123'),
-        ('Heloísa Cunha', 'Rua X, 24', 'passageiro24@email.com', '${passageiroPhones[23]}', '123'),
-        ('Igor Freitas', 'Rua Y, 25', 'passageiro25@email.com', '${passageiroPhones[24]}', '123'),
-        ('Janaína Moura', 'Rua Z, 26', 'passageiro26@email.com', '${passageiroPhones[25]}', '123'),
-        ('Kevin Viana', 'Av. Central, 30', 'passageiro27@email.com', '${passageiroPhones[26]}', '123'),
-        ('Larissa Godoi', 'Rua da Paz, 40', 'passageiro28@email.com', '${passageiroPhones[27]}', '123'),
-        ('Marcelo Evaristo', 'Rua Nova, 50', 'passageiro29@email.com', '${passageiroPhones[28]}', '123'),
-        ('Natália Sales', 'Travessa da Lua, 60', 'passageiro30@email.com', '${passageiroPhones[29]}', '123');
+        ('Ricardo Pires', 'Rua A, 1', 'passageiro1@email.com', '${passageiroPhones[0]}', '${hashedPassword}'),
+        ('Camila Alves', 'Rua B, 2', 'passageiro2@email.com', '${passageiroPhones[1]}', '${hashedPassword}'),
+        ('Felipe Gomes', 'Rua C, 3', 'passageiro3@email.com', '${passageiroPhones[2]}', '${hashedPassword}'),
+        ('Gabriela Nogueira', 'Rua D, 4', 'passageiro4@email.com', '${passageiroPhones[3]}', '${hashedPassword}'),
+        ('Rafael Barbosa', 'Rua E, 5', 'passageiro5@email.com', '${passageiroPhones[4]}', '${hashedPassword}'),
+        ('Aline Dantas', 'Rua F, 6', 'passageiro6@email.com', '${passageiroPhones[5]}', '${hashedPassword}'),
+        ('Bruno Queiroz', 'Rua G, 7', 'passageiro7@email.com', '${passageiroPhones[6]}', '${hashedPassword}'),
+        ('Julia Martins', 'Rua H, 8', 'passageiro8@email.com', '${passageiroPhones[7]}', '${hashedPassword}'),
+        ('Daniel Lins', 'Rua I, 9', 'passageiro9@email.com', '${passageiroPhones[8]}', '${hashedPassword}'),
+        ('Vitória Rios', 'Rua J, 10', 'passageiro10@email.com', '${passageiroPhones[9]}', '${hashedPassword}'),
+        ('Leonardo Vaz', 'Rua K, 11', 'passageiro11@email.com', '${passageiroPhones[10]}', '${hashedPassword}'),
+        ('Patrícia Neves', 'Rua L, 12', 'passageiro12@email.com', '${passageiroPhones[11]}', '${hashedPassword}'),
+        ('Thiago Fogaça', 'Rua M, 13', 'passageiro13@email.com', '${passageiroPhones[12]}', '${hashedPassword}'),
+        ('Manuela Mendes', 'Rua N, 14', 'passageiro14@email.com', '${passageiroPhones[13]}', '${hashedPassword}'),
+        ('Enzo Ferreira', 'Rua O, 15', 'passageiro15@email.com', '${passageiroPhones[14]}', '${hashedPassword}'),
+        ('Helena Castro', 'Rua P, 16', 'passageiro16@email.com', '${passageiroPhones[15]}', '${hashedPassword}'),
+        ('Caio Becker', 'Rua Q, 17', 'passageiro17@email.com', '${passageiroPhones[16]}', '${hashedPassword}'),
+        ('Bianca Cruz', 'Rua R, 18', 'passageiro18@email.com', '${passageiroPhones[17]}', '${hashedPassword}'),
+        ('André Rocha', 'Rua S, 19', 'passageiro19@email.com', '${passageiroPhones[18]}', '${hashedPassword}'),
+        ('Clara Pinto', 'Rua T, 20', 'passageiro20@email.com', '${passageiroPhones[19]}', '${hashedPassword}'),
+        ('Davi Guerra', 'Rua U, 21', 'passageiro21@email.com', '${passageiroPhones[20]}', '${hashedPassword}'),
+        ('Eva Ribeiro', 'Rua V, 22', 'passageiro22@email.com', '${passageiroPhones[21]}', '${hashedPassword}'),
+        ('Giovanni Telles', 'Rua W, 23', 'passageiro23@email.com', '${passageiroPhones[22]}', '${hashedPassword}'),
+        ('Heloísa Cunha', 'Rua X, 24', 'passageiro24@email.com', '${passageiroPhones[23]}', '${hashedPassword}'),
+        ('Igor Freitas', 'Rua Y, 25', 'passageiro25@email.com', '${passageiroPhones[24]}', '${hashedPassword}'),
+        ('Janaína Moura', 'Rua Z, 26', 'passageiro26@email.com', '${passageiroPhones[25]}', '${hashedPassword}'),
+        ('Kevin Viana', 'Av. Central, 30', 'passageiro27@email.com', '${passageiroPhones[26]}', '${hashedPassword}'),
+        ('Larissa Godoi', 'Rua da Paz, 40', 'passageiro28@email.com', '${passageiroPhones[27]}', '${hashedPassword}'),
+        ('Marcelo Evaristo', 'Rua Nova, 50', 'passageiro29@email.com', '${passageiroPhones[28]}', '${hashedPassword}'),
+        ('Natália Sales', 'Travessa da Lua, 60', 'passageiro30@email.com', '${passageiroPhones[29]}', '${hashedPassword}');
     
 
       --------------------------------------------------
