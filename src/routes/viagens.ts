@@ -49,4 +49,20 @@ router.post('/', (req: Request, res: Response) => {
   });
 });
 
+// 🔹 Listar todas as viagens
+router.get('/', (req: Request, res: Response) => {
+  const query = `
+    SELECT v.id_viagem, v.local_saida, v.local_chegada, v.horario_partida, 
+           v.valor_por_km, v.vagas_maximas, v.placa_veiculo, ve.modelo
+    FROM Viagem v
+    JOIN Veiculo ve ON v.placa_veiculo = ve.placa
+    ORDER BY v.id_viagem DESC
+  `;
+
+  db.all(query, [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
 export default router;
