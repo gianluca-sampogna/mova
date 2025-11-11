@@ -3,32 +3,50 @@ import { db } from '../db/database';
 
 const router = express.Router();
 
-router.post('/', (req: Request, res: Response) => {
-  const { horario_partida, local_saida, local_chegada, placa_veiculo } = req.body;
+// Define o tipo do veículo vindo do banco
+type VeiculoDB = {
+  id_motorista: number;
+  vagas_maximas: number; // mapeado do passageiros_maximos
+};
 
-  if (!horario_partida || !local_saida || !local_chegada || !placa_veiculo) {
+router.post('/', (req: Request, res: Response) => {
+  const { local_saida, local_chegada, placa_veiculo } = req.body;
+
+  if (!local_saida || !local_chegada || !placa_veiculo) {
     return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
   }
 
-  // Dados fixos por enquanto
-  const valor_por_km = 1.5;
-  const vagas_maximas = 4;
-  const id_motorista = 1;
-
-  const query = `
-    INSERT INTO Viagem 
-    (horario_partida, valor_por_km, local_saida, local_chegada, vagas_maximas, id_motorista, placa_veiculo)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+  // Buscar veículo no banco para pegar id_motorista e passageiros_maximos como vagas_maximas
+  const queryVeiculo = `
+    SELECT id_motorista, passageiros_maximos AS vagas_maximas 
+    FROM Veiculo 
+    WHERE placa = ?
   `;
 
-  db.run(
-    query,
-    [horario_partida, valor_por_km, local_saida, local_chegada, vagas_maximas, id_motorista, placa_veiculo],
-    function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res.status(201).json({ message: 'Viagem criada com sucesso', id_viagem: this.lastID });
-    }
-  );
+  db.get<VeiculoDB>(queryVeiculo, [placa_veiculo], (err, veiculo) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!veiculo) return res.status(404).json({ error: 'Veículo não encontrado' });
+
+    const { id_motorista, vagas_maximas } = veiculo;
+
+    const valor_por_km = 1.5;
+    const horario_partida = '08:00'; // fixo
+
+    const insertQuery = `
+      INSERT INTO Viagem 
+      (horario_partida, valor_por_km, local_saida, local_chegada, vagas_maximas, id_motorista, placa_veiculo)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    db.run(
+      insertQuery,
+      [horario_partida, valor_por_km, local_saida, local_chegada, vagas_maximas, id_motorista, placa_veiculo],
+      function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.status(201).json({ message: 'Viagem criada com sucesso', id_viagem: this.lastID });
+      }
+    );
+  });
 });
 
 export default router;
