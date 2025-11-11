@@ -110,4 +110,18 @@ export const initDatabase = () => {
       console.error('Erro ao adicionar colunas:', err.message);
     }
   });
+  db.run(`
+    ALTER TABLE Viagem ADD COLUMN km REAL;
+  `, (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.error('Erro ao adicionar colunas:', err.message);
+    }
+  });
+  db.run(`
+    ALTER TABLE Viagem ADD COLUMN valor_total REAL;
+  `, (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.error('Erro ao adicionar colunas:', err.message);
+    }
+  });
 };
