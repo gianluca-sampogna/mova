@@ -177,7 +177,6 @@ const cadastrarUsuario =
         return res.status(400).json({ message: "Todos os campos são obrigatórios." });
       }
 
-      // 🔐 Gera o hash ANTES do insert
       const senhaHash = await bcrypt.hash(senha, saltRounds);
 
       db.run(

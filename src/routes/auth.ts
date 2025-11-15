@@ -5,11 +5,8 @@ import jwt from "jsonwebtoken";
 import { Pessoa } from "../../types/models";
 
 const router = express.Router();
-
-// Segredo do JWT (em produção, use env variable)
 const JWT_SECRET = "supersecret";
 
-// POST /auth/login
 router.post("/login", (req, res) => {
   const { email, senha } = req.body;
 
@@ -43,16 +40,13 @@ router.post("/login", (req, res) => {
       JWT_SECRET
     );
 
-    // --- CORREÇÃO AQUI ---
-    // Adicione id_usuario: user.id_usuario ao JSON
     res.status(200).json({
       message: "Login realizado com sucesso!",
       token,
       tipo,
-      id_usuario: user.id_usuario, // Adicionado
-      user: user, // Adicionado
+      id_usuario: user.id_usuario,
+      user: user, 
     });
-    // -----------------------
   });
 });
 

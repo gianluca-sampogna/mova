@@ -1,15 +1,11 @@
 import { db } from "./database";
-import bcrypt from "bcryptjs"; // 1. Importe o bcrypt
+import bcrypt from "bcryptjs"; 
 
-// Função utilitária para gerar um número de telefone simulado
 const generatePhone = (start: string) => {
   const num = Math.floor(Math.random() * 90000000) + 10000000;
-  // Retorna a string do número de telefone
   return `${start}${num}`;
 };
 
-// Array para armazenar os números de telefone gerados antes de rodar o db.exec
-// Isso é necessário porque o template literal é avaliado ANTES do db.exec
 const motoristaPhones = [
   generatePhone("119"),
   generatePhone("119"),
@@ -25,13 +21,10 @@ const motoristaPhones = [
 
 const passageiroPhones: string[] = [];
 for (let i = 0; i < 30; i++) {
-  passageiroPhones.push(generatePhone(i < 5 ? "119" : i < 8 ? "219" : "919")); // Distribuição de DDDs
+  passageiroPhones.push(generatePhone(i < 5 ? "119" : i < 8 ? "219" : "919")); 
 }
 
 export const seedDatabase = () => {
-  // 2. Gere o hash para a senha '123' ANTES de executar o SQL
-  // Usamos 'Sync' (síncrono) aqui pois é um script de seed,
-  // não há problema em bloquear a thread principal momentaneamente.
   const salt = bcrypt.genSaltSync(10);
   const hashedPassword = bcrypt.hashSync("123", salt);
 

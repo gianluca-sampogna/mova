@@ -43,7 +43,6 @@ router.post("/", (req, res) => {
     }
   });
 
-// GET: listar veículos do motorista logado
 router.get("/", (req, res) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ message: "Token ausente" });

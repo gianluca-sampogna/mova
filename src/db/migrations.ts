@@ -92,9 +92,4 @@ export const initDatabase = () => {
 
     console.log("📦 Todas as tabelas foram criadas ou já existiam.");
   });
-
-  // --- REMOVIDO ---
-  // Os comandos 'ALTER TABLE' abaixo foram removidos
-  // pois as colunas agora são criadas
-  // diretamente no 'CREATE TABLE' acima.
 };
