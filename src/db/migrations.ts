@@ -92,4 +92,9 @@ export const initDatabase = () => {
 
     console.log("📦 Todas as tabelas foram criadas ou já existiam.");
   });
+  db.run(`
+  ALTER TABLE Checkin
+  ADD COLUMN status TEXT DEFAULT 'ativo'
+`);
+
 };
