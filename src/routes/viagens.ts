@@ -133,6 +133,7 @@ router.post("/", async (req: Request, res: Response) => {
           local_chegada,
           vagas_maximas,
           id_motorista_token,
+          id_motorista_token,
           placa_veiculo,
           km,
           valor_total,
@@ -156,6 +157,9 @@ router.post("/", async (req: Request, res: Response) => {
   }
 });
 
+// =========================================================================
+// ROTA 2: LISTAR MINHAS VIAGENS (GET /) - FILTRADA
+// =========================================================================
 router.get("/", (req: Request, res: Response) => {
   const tokenCheck = validarToken(req, res);
   if (tokenCheck.erro)
