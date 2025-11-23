@@ -22,7 +22,6 @@ router.delete("/:id_viagem", (req: Request, res: Response) => {
   const id_motorista_token = decodedToken.id_usuario;
   const { id_viagem } = req.params;
 
-  // Verifica se a viagem existe e pertence ao motorista
   const checkQuery = `
     SELECT * FROM Viagem 
     WHERE id_viagem = ? AND id_motorista = ?
@@ -46,3 +45,4 @@ router.delete("/:id_viagem", (req: Request, res: Response) => {
     });
   });
 });
+export default router;

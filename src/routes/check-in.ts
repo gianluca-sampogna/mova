@@ -5,7 +5,7 @@ import { db } from "../db/database";
 const router = express.Router();
 const JWT_SECRET = "supersecret";
 
-router.post("/checkin", (req: Request, res: Response) => {
+router.post("/", (req: Request, res: Response) => {
   const authHeader = req.headers.authorization;
   if (!authHeader)
     return res.status(401).json({ message: "Token não fornecido." });
@@ -26,7 +26,6 @@ router.post("/checkin", (req: Request, res: Response) => {
     return res.status(400).json({ message: "Todos os campos são obrigatórios." });
   }
 
-  // Verifica se a viagem existe
   const checkViagemQuery = `SELECT * FROM Viagem WHERE id_viagem = ?`;
   
   db.get(checkViagemQuery, [id_viagem], (err, viagem) => {
@@ -34,7 +33,6 @@ router.post("/checkin", (req: Request, res: Response) => {
     if (!viagem)
       return res.status(404).json({ message: "Viagem não encontrada." });
 
-    // Verifica se o passageiro já fez check-in
     const checkDuplicadoQuery = `
       SELECT * FROM Checkin
       WHERE id_passageiro = ? AND id_viagem = ?
@@ -68,4 +66,41 @@ router.post("/checkin", (req: Request, res: Response) => {
   });
 });
 
+router.get("/viagens/:id_viagem", (req: Request, res: Response) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader)
+    return res.status(401).json({ message: "Token não fornecido." });
+
+  const token = authHeader.split(" ")[1];
+  let decoded: any;
+
+  try {
+    decoded = jwt.verify(token, JWT_SECRET);
+  } catch {
+    return res.status(401).json({ message: "Token inválido." });
+  }
+
+  const { id_viagem } = req.params;
+  if (!id_viagem)
+    return res.status(400).json({ message: "ID da viagem obrigatório." });
+
+  const query = `
+    SELECT c.id_checkin, c.ponto_embarque, p.nome AS nome_passageiro, p.num_telefone
+    FROM Checkin c
+    JOIN Passageiro pa ON c.id_passageiro = pa.id_passageiro
+    JOIN Pessoa p ON pa.id_passageiro = p.id_usuario
+    WHERE c.id_viagem = ?
+  `;
+
+  db.all(query, [id_viagem], (err, rows) => {
+    if (err) {
+      console.error("Erro ao buscar check-ins:", err);
+      return res.status(500).json({ message: "Erro interno ao buscar check-ins." });
+    }
+
+    if (!rows) rows = [];
+
+    res.json(rows);
+  });
+});
 export default router;

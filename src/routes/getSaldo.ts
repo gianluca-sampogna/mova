@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 const router = express.Router();
 const JWT_SECRET = "supersecret";
 
-router.get("/", (req: Request, res: Response) => {
+router.get("/saldo", (req: Request, res: Response) => {
   const authHeader = req.headers.authorization;
   if (!authHeader)
     return res.status(401).json({ message: "Token não fornecido." });
@@ -19,21 +19,18 @@ router.get("/", (req: Request, res: Response) => {
     return res.status(401).json({ message: "Token inválido." });
   }
 
-  const id_passageiro = decoded.id_usuario;
+  const id_motorista = decoded.id_usuario;
 
   const query = `
-    SELECT c.id_checkin, c.id_viagem, c.ponto_embarque,
-           v.local_saida, v.local_chegada, v.horario_partida,
-           v.valor_por_km, v.km, v.valor_total, v.placa_veiculo
-    FROM Checkin c
-    JOIN Viagem v ON c.id_viagem = v.id_viagem
-    WHERE c.id_passageiro = ?
-    ORDER BY c.id_checkin DESC
+    SELECT SUM(v.valor_total) AS saldo
+    FROM Viagem v
+    JOIN Checkin c ON c.id_viagem = v.id_viagem
+    WHERE v.id_motorista = ? AND c.status != 'cancelado'
   `;
 
-  db.all(query, [id_passageiro], (err, rows) => {
+  db.get(query, [id_motorista], (err, row: { saldo: number } | undefined) => {
     if (err) return res.status(500).json({ message: err.message });
-    res.json(rows);
+    res.json({ saldo: row?.saldo ?? 0 });
   });
 });
 

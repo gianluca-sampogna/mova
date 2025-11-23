@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 const router = express.Router();
 const JWT_SECRET = "supersecret";
 
-router.patch("/checkin/:id_checkin/cancelar", (req, res) => {
+router.patch("/check-in/:id_checkin/cancelar", (req, res) => {
   const authHeader = req.headers.authorization;
   if (!authHeader)
     return res.status(401).json({ message: "Token não fornecido." });
@@ -45,3 +45,5 @@ router.patch("/checkin/:id_checkin/cancelar", (req, res) => {
     });
   });
 });
+
+export default router;
